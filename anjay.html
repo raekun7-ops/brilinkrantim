@@ -272,93 +272,13 @@
       font-size:11.5px;
     }
 
-    /* --- Card layout: no sideways scrolling on phones --- */
+    /* Tabel tetap berbentuk tabel biasa seperti di PC, tinggal digeser (scroll) ke samping bila perlu */
     .table-scroll{
-      overflow-x:visible;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
     }
     table{
-      min-width:0;
-      width:100%;
-      border:none;
-    }
-    thead{
-      display:none;
-    }
-    tbody{
-      display:block;
-    }
-    tbody tr{
-      display:block;
-      position:relative;
-      background:#fff !important;
-      border:1px solid var(--blue-line);
-      border-radius:10px;
-      margin:0 0 12px;
-      padding:34px 40px 10px 14px;
-      box-shadow:0 1px 5px rgba(37,99,168,.06);
-    }
-    tbody tr::before{
-      content:"Agent #" attr(data-index);
-      position:absolute;
-      top:10px;
-      left:14px;
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:.3px;
-      text-transform:uppercase;
-      color:var(--blue-deep);
-    }
-    tbody td{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      width:100%;
-      border:none;
-      border-top:1px solid var(--blue-line);
-      padding:8px 0;
-      font-size:13px;
-      text-align:right;
-    }
-    tbody td:first-of-type{
-      border-top:none;
-    }
-    tbody td.no-col{
-      display:none;
-    }
-    td.nasabah, td.brilink, td.norek, td.mantri-cell{
-      text-align:right;
-    }
-    tbody td[data-label]::before{
-      content:attr(data-label);
-      font-weight:600;
-      color:var(--muted);
-      text-align:left;
-      flex:0 0 auto;
-    }
-    td.mantri-cell{
-      padding:8px 0;
-    }
-    .mantri-select{
-      width:auto;
-      max-width:60%;
-      text-align:right;
-      text-align-last:right;
-      padding:5px 2px;
-    }
-    .row-actions{
-      display:block;
-      position:absolute;
-      top:6px;
-      right:6px;
-      width:30px;
-      height:30px;
-      border:none;
-    }
-    .row-actions button{
-      border-radius:6px;
-      padding:0;
-      font-size:16px;
+      min-width:620px;
     }
   }
 
