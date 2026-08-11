@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laporan Aktivasi Agent BRILink Mantri</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -25,7 +25,7 @@
     padding:32px 16px 80px;
   }
   .toolbar{
-    max-width:1000px;
+    max-width:880px;
     margin:0 auto 20px;
     display:flex;
     gap:10px;
@@ -58,7 +58,7 @@
   }
 
   #capture{
-    max-width:1000px;
+    max-width:880px;
     margin:0 auto;
     background:#ffffff;
     border:1px solid var(--blue-line);
@@ -73,7 +73,7 @@
   }
   .header-band h1{
     margin:0;
-    font-size:22px;
+    font-size:24px;
     letter-spacing:.6px;
     font-weight:800;
     text-transform:uppercase;
@@ -117,9 +117,9 @@
     font-weight:600;
   }
   tbody td{
-    padding:9px 10px;
+    padding:10px 12px;
     border:1px solid var(--blue-line);
-    font-size:13.5px;
+    font-size:14.5px;
     text-align:center;
     vertical-align:middle;
   }
@@ -258,14 +258,6 @@
       padding:8px 16px;
       justify-content:center;
     }
-    thead th{
-      font-size:11px;
-      padding:10px 8px;
-    }
-    tbody td{
-      font-size:12.5px;
-      padding:8px 8px;
-    }
     tfoot td{
       padding:12px 16px;
     }
@@ -279,22 +271,103 @@
       gap:6px 12px;
       font-size:11.5px;
     }
+
+    /* --- Card layout: no sideways scrolling on phones --- */
+    .table-scroll{
+      overflow-x:visible;
+    }
+    table{
+      min-width:0;
+      width:100%;
+      border:none;
+    }
+    thead{
+      display:none;
+    }
+    tbody{
+      display:block;
+    }
+    tbody tr{
+      display:block;
+      position:relative;
+      background:#fff !important;
+      border:1px solid var(--blue-line);
+      border-radius:10px;
+      margin:0 0 12px;
+      padding:34px 40px 10px 14px;
+      box-shadow:0 1px 5px rgba(37,99,168,.06);
+    }
+    tbody tr::before{
+      content:"Agent #" attr(data-index);
+      position:absolute;
+      top:10px;
+      left:14px;
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+      color:var(--blue-deep);
+    }
+    tbody td{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      width:100%;
+      border:none;
+      border-top:1px solid var(--blue-line);
+      padding:8px 0;
+      font-size:13px;
+      text-align:right;
+    }
+    tbody td:first-of-type{
+      border-top:none;
+    }
+    tbody td.no-col{
+      display:none;
+    }
+    td.nasabah, td.brilink, td.norek, td.mantri-cell{
+      text-align:right;
+    }
+    tbody td[data-label]::before{
+      content:attr(data-label);
+      font-weight:600;
+      color:var(--muted);
+      text-align:left;
+      flex:0 0 auto;
+    }
+    td.mantri-cell{
+      padding:8px 0;
+    }
+    .mantri-select{
+      width:auto;
+      max-width:60%;
+      text-align:right;
+      text-align-last:right;
+      padding:5px 2px;
+    }
+    .row-actions{
+      display:block;
+      position:absolute;
+      top:6px;
+      right:6px;
+      width:30px;
+      height:30px;
+      border:none;
+    }
+    .row-actions button{
+      border-radius:6px;
+      padding:0;
+      font-size:16px;
+    }
   }
 
   @media (max-width: 420px){
     .header-band h1{
       font-size:14.5px;
     }
-    table{
-      min-width:560px;
-    }
-    thead th{
-      font-size:10px;
-      padding:8px 6px;
-    }
     tbody td{
-      font-size:12px;
-      padding:7px 6px;
+      font-size:12.5px;
     }
   }
 </style>
@@ -331,10 +404,10 @@
       <tbody id="tableBody">
         <tr>
           <td class="no-col">1</td>
-          <td class="nasabah" contenteditable="true">azmiyatul ulya</td>
-          <td class="brilink" contenteditable="true">nusa asa borneo</td>
-          <td class="norek" contenteditable="true" maxlength="15">4562-01-035240-5</td>
-          <td class="mantri-cell">
+          <td class="nasabah" contenteditable="true" data-label="Nama Nasabah">azmiyatul ulya</td>
+          <td class="brilink" contenteditable="true" data-label="Nama BRILink">nusa asa borneo</td>
+          <td class="norek" contenteditable="true" maxlength="15" data-label="No Rekening">4562-01-035240-5</td>
+          <td class="mantri-cell" data-label="Mantri">
             <select class="mantri-select">
               <option value="">— pilih —</option>
               <option value="REZA">REZA</option>
@@ -396,6 +469,7 @@
     const rows = tableBody.querySelectorAll('tr');
     rows.forEach((row, i) => {
       row.querySelector('.no-col').textContent = i + 1;
+      row.setAttribute('data-index', i + 1);
     });
     totalCount.textContent = rows.length;
   }
@@ -450,10 +524,10 @@
     const row = document.createElement('tr');
     row.innerHTML = `
       <td class="no-col"></td>
-      <td class="nasabah" contenteditable="true"></td>
-      <td class="brilink" contenteditable="true"></td>
-      <td class="norek" contenteditable="true" maxlength="15"></td>
-      <td class="mantri-cell"></td>
+      <td class="nasabah" contenteditable="true" data-label="Nama Nasabah"></td>
+      <td class="brilink" contenteditable="true" data-label="Nama BRILink"></td>
+      <td class="norek" contenteditable="true" maxlength="15" data-label="No Rekening"></td>
+      <td class="mantri-cell" data-label="Mantri"></td>
       <td class="row-actions no-export"><button class="delRowBtn" title="Hapus baris">✕</button></td>
     `;
     const mantriCell = row.querySelector('.mantri-cell');
@@ -474,12 +548,13 @@
   tableBody.querySelectorAll('.mantri-select').forEach(sel => {
     sel.addEventListener('change', updateMantriCounts);
   });
+  renumber();
   updateMantriCounts();
 
   document.getElementById('downloadBtn').addEventListener('click', () => {
     const capture = document.getElementById('capture');
     const hiddenEls = capture.querySelectorAll('.no-export');
-    hiddenEls.forEach(el => el.style.visibility = 'hidden');
+    hiddenEls.forEach(el => el.style.setProperty('display', 'none', 'important'));
 
     const selects = capture.querySelectorAll('.mantri-select');
     const replacements = [];
@@ -498,7 +573,7 @@
       windowWidth: 1100,
       windowHeight: Math.max(capture.scrollHeight + 200, 900)
     }).then(canvas => {
-      hiddenEls.forEach(el => el.style.visibility = '');
+      hiddenEls.forEach(el => el.style.removeProperty('display'));
       replacements.forEach(({sel, span}) => {
         sel.style.display = '';
         span.remove();
