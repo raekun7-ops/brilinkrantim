@@ -494,7 +494,9 @@
 
     html2canvas(capture, {
       backgroundColor:'#ffffff',
-      scale: 2
+      scale: 2,
+      windowWidth: 1100,
+      windowHeight: Math.max(capture.scrollHeight + 200, 900)
     }).then(canvas => {
       hiddenEls.forEach(el => el.style.visibility = '');
       replacements.forEach(({sel, span}) => {
