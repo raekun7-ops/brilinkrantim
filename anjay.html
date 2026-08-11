@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Laporan Aktivasi Agent BRILink Mantri</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -15,6 +16,7 @@
     --paper:#f6fafd;
   }
   *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
   body{
     margin:0;
     background:var(--paper);
@@ -29,6 +31,11 @@
     gap:10px;
     flex-wrap:wrap;
     align-items:center;
+  }
+  .table-scroll{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
   }
   .toolbar button{
     background:var(--blue-deep);
@@ -94,6 +101,7 @@
 
   table{
     width:100%;
+    min-width:620px;
     border-collapse:collapse;
   }
   thead th{
@@ -218,6 +226,77 @@
   @media print{
     .toolbar{display:none;}
   }
+
+  @media (max-width: 720px){
+    body{
+      padding:18px 8px 60px;
+    }
+    .toolbar{
+      justify-content:stretch;
+    }
+    .toolbar button{
+      flex:1 1 auto;
+      width:100%;
+    }
+    .toolbar .hint{
+      margin-left:0;
+      width:100%;
+      text-align:center;
+      order:3;
+    }
+    .header-band{
+      padding:20px 16px 14px;
+    }
+    .header-band h1{
+      font-size:16.5px;
+      letter-spacing:.3px;
+    }
+    .header-band h2{
+      font-size:12px;
+    }
+    .meta-row{
+      padding:8px 16px;
+      justify-content:center;
+    }
+    thead th{
+      font-size:11px;
+      padding:10px 8px;
+    }
+    tbody td{
+      font-size:12.5px;
+      padding:8px 8px;
+    }
+    tfoot td{
+      padding:12px 16px;
+    }
+    .footer-band{
+      flex-direction:column;
+      align-items:flex-start;
+      padding:12px 16px 16px;
+      gap:10px;
+    }
+    .mantri-summary{
+      gap:6px 12px;
+      font-size:11.5px;
+    }
+  }
+
+  @media (max-width: 420px){
+    .header-band h1{
+      font-size:14.5px;
+    }
+    table{
+      min-width:560px;
+    }
+    thead th{
+      font-size:10px;
+      padding:8px 6px;
+    }
+    tbody td{
+      font-size:12px;
+      padding:7px 6px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -237,6 +316,7 @@
       <span>Total Agent: <b id="totalCount">1</b></span>
     </div>
 
+    <div class="table-scroll">
     <table id="reportTable">
       <thead>
         <tr>
@@ -276,6 +356,7 @@
         </tr>
       </tfoot>
     </table>
+    </div>
 
     <div class="footer-band">
       <div class="mantri-summary" id="mantriSummary"></div>
