@@ -352,7 +352,7 @@
           <td class="row-actions no-export"><button class="delRowBtn" title="Hapus baris">✕</button></td>
         </tr>
       </tbody>
-      <tfoot>
+      <tfoot class="no-export">
         <tr>
           <td colspan="6">
             <button class="add-row-btn" id="addRowBtnBottom">+ Tambah Baris</button>
@@ -514,7 +514,7 @@
     const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
     return d.getDate() + " " + bulan[d.getMonth()] + " " + d.getFullYear();
   }
-  printDate.textContent = "Dicetak: " + todayStr();
+  printDate.textContent = "Tanggal: " + todayStr();
 
   function renumber(){
     const rows = tableBody.querySelectorAll('tr');
