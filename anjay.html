@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Laporan Aktivasi Agent BRILink Mantri</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --blue-deep:#2563a8;
+    --blue-mid:#4f8fd1;
+    --blue-light:#eaf3fb;
+    --blue-line:#c9dcef;
+    --ink:#22364a;
+    --muted:#6c8199;
+    --paper:#f6fafd;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    font-family:'Segoe UI', Arial, sans-serif;
+    color:var(--ink);
+    padding:32px 16px 80px;
+  }
+  .toolbar{
+    max-width:1000px;
+    margin:0 auto 20px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .toolbar button{
+    background:var(--blue-deep);
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow:0 2px 4px rgba(37,99,168,.15);
+    transition:background .15s ease, transform .1s ease;
+  }
+  .toolbar button:hover{background:#1c4d80;}
+  .toolbar button:active{transform:translateY(1px);}
+  .toolbar .hint{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-left:auto;
+  }
+
+  #capture{
+    max-width:1000px;
+    margin:0 auto;
+    background:#ffffff;
+    border:1px solid var(--blue-line);
+    box-shadow:0 4px 18px rgba(37,99,168,.08);
+  }
+
+  .header-band{
+    background:#ffffff;
+    padding:30px 30px 18px;
+    text-align:center;
+    border-bottom:3px solid var(--blue-mid);
+  }
+  .header-band h1{
+    margin:0;
+    font-size:22px;
+    letter-spacing:.6px;
+    font-weight:800;
+    text-transform:uppercase;
+    color:var(--blue-deep);
+  }
+  .header-band h2{
+    margin:6px 0 0;
+    font-size:13.5px;
+    font-weight:600;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--blue-mid);
+  }
+
+  .meta-row{
+    display:flex;
+    justify-content:flex-end;
+    padding:10px 30px;
+    background:var(--blue-light);
+    border-bottom:1px solid var(--blue-line);
+    font-size:12.5px;
+    color:var(--muted);
+  }
+  .meta-row span b{color:var(--ink);}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  thead th{
+    background:var(--blue-deep);
+    color:#fff;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    padding:12px 10px;
+    text-align:center;
+    border:1px solid var(--blue-deep);
+    white-space:nowrap;
+    font-weight:600;
+  }
+  tbody td{
+    padding:9px 10px;
+    border:1px solid var(--blue-line);
+    font-size:13.5px;
+    text-align:center;
+    vertical-align:middle;
+  }
+  tbody tr:nth-child(odd){background:var(--blue-light);}
+  tbody tr:nth-child(even){background:#ffffff;}
+  tbody td.no-col{
+    font-weight:700;
+    color:var(--blue-deep);
+    width:46px;
+  }
+  tbody td[contenteditable="true"]{
+    cursor:text;
+  }
+  tbody td[contenteditable="true"]:hover{
+    outline:1.5px dashed var(--blue-mid);
+    outline-offset:-2px;
+  }
+  tbody td[contenteditable="true"]:focus{
+    outline:2px solid var(--blue-deep);
+    outline-offset:-2px;
+    background:#fff;
+  }
+  td.nasabah, td.brilink{ text-align:left; }
+  td.norek{ font-variant-numeric:tabular-nums; letter-spacing:.3px; }
+
+  td.mantri-cell{ padding:5px 8px; }
+  .mantri-select{
+    width:100%;
+    border:none;
+    background:transparent;
+    font-size:13.5px;
+    color:var(--ink);
+    text-align:center;
+    text-align-last:center;
+    padding:5px 4px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .mantri-select:focus{
+    outline:2px solid var(--blue-deep);
+    border-radius:3px;
+    background:#fff;
+  }
+
+  .row-actions{
+    width:34px;
+    padding:0 !important;
+    border:1px solid var(--blue-line);
+  }
+  .row-actions button{
+    width:100%;
+    height:100%;
+    border:none;
+    background:transparent;
+    color:#b0433b;
+    font-size:15px;
+    cursor:pointer;
+    padding:9px 0;
+  }
+  .row-actions button:hover{background:#f7dede;}
+
+  tfoot td{
+    padding:14px 30px;
+    border:none;
+  }
+  .add-row-btn{
+    background:#fff;
+    border:1.5px dashed var(--blue-deep);
+    color:var(--blue-deep);
+    padding:9px 16px;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .add-row-btn:hover{background:var(--blue-light);}
+
+  .footer-band{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 30px 20px;
+    font-size:11.5px;
+    color:var(--muted);
+    border-top:1px solid var(--blue-line);
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .mantri-summary{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    font-size:12px;
+    color:var(--ink);
+  }
+  .mantri-summary .item{
+    white-space:nowrap;
+  }
+  .mantri-summary .item b{
+    color:var(--blue-deep);
+  }
+
+  .no-export{}
+  @media print{
+    .toolbar{display:none;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <button id="downloadBtn">⬇ Unduh sebagai PNG</button>
+    <span class="hint">Klik pada sel untuk mengedit • No. rekening maks 15 karakter • Klik ✕ untuk hapus baris</span>
+  </div>
+
+  <div id="capture">
+    <div class="header-band">
+      <h1>Aktivasi Agent BRILink Mantri</h1>
+      <h2 id="unitName" contenteditable="true">Unit Rantau Timur</h2>
+    </div>
+
+    <div class="meta-row">
+      <span>Total Agent: <b id="totalCount">1</b></span>
+    </div>
+
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th style="width:46px;">No</th>
+          <th>Nama Nasabah</th>
+          <th>Nama BRILink</th>
+          <th>No Rekening</th>
+          <th>Mantri</th>
+          <th class="no-export" style="width:34px;"></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr>
+          <td class="no-col">1</td>
+          <td class="nasabah" contenteditable="true">azmiyatul ulya</td>
+          <td class="brilink" contenteditable="true">nusa asa borneo</td>
+          <td class="norek" contenteditable="true" maxlength="15">4562-01-035240-5</td>
+          <td class="mantri-cell">
+            <select class="mantri-select">
+              <option value="">— pilih —</option>
+              <option value="REZA">REZA</option>
+              <option value="RIKA" selected>RIKA</option>
+              <option value="IWAN">IWAN</option>
+              <option value="CINLAW">CINLAW</option>
+              <option value="SHALEH">SHALEH</option>
+              <option value="RAEHAN">RAEHAN</option>
+            </select>
+          </td>
+          <td class="row-actions no-export"><button class="delRowBtn" title="Hapus baris">✕</button></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6">
+            <button class="add-row-btn" id="addRowBtnBottom">+ Tambah Baris</button>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="footer-band">
+      <div class="mantri-summary" id="mantriSummary"></div>
+      <span id="printDate"></span>
+    </div>
+  </div>
+
+<script>
+  const tableBody = document.getElementById('tableBody');
+  const totalCount = document.getElementById('totalCount');
+  const printDate = document.getElementById('printDate');
+
+  const MANTRI_OPTIONS = ["REZA","RIKA","IWAN","CINLAW","SHALEH","RAEHAN"];
+  const mantriSummary = document.getElementById('mantriSummary');
+
+  function updateMantriCounts(){
+    const counts = {};
+    MANTRI_OPTIONS.forEach(name => counts[name] = 0);
+    tableBody.querySelectorAll('.mantri-select').forEach(sel => {
+      if(sel.value && counts.hasOwnProperty(sel.value)){
+        counts[sel.value]++;
+      }
+    });
+    mantriSummary.innerHTML = MANTRI_OPTIONS
+      .map(name => `<span class="item">${name} : <b>${counts[name]}</b></span>`)
+      .join('');
+  }
+
+  function todayStr(){
+    const d = new Date();
+    const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    return d.getDate() + " " + bulan[d.getMonth()] + " " + d.getFullYear();
+  }
+  printDate.textContent = "Dicetak: " + todayStr();
+
+  function renumber(){
+    const rows = tableBody.querySelectorAll('tr');
+    rows.forEach((row, i) => {
+      row.querySelector('.no-col').textContent = i + 1;
+    });
+    totalCount.textContent = rows.length;
+  }
+
+  function enforceMaxLength(cell){
+    cell.addEventListener('input', () => {
+      const text = cell.textContent;
+      if(text.length > 15){
+        cell.textContent = text.slice(0, 15);
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(cell);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    });
+  }
+
+  function buildMantriSelect(){
+    const select = document.createElement('select');
+    select.className = 'mantri-select';
+    const blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = '— pilih —';
+    select.appendChild(blank);
+    MANTRI_OPTIONS.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+    return select;
+  }
+
+  function attachDelHandler(btn){
+    btn.addEventListener('click', () => {
+      if(tableBody.querySelectorAll('tr').length <= 1){
+        const row = btn.closest('tr');
+        row.querySelectorAll('[contenteditable]').forEach(c => c.textContent = '');
+        row.querySelector('.mantri-select').value = '';
+        updateMantriCounts();
+        return;
+      }
+      btn.closest('tr').remove();
+      renumber();
+      updateMantriCounts();
+    });
+  }
+
+  function addRow(){
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="no-col"></td>
+      <td class="nasabah" contenteditable="true"></td>
+      <td class="brilink" contenteditable="true"></td>
+      <td class="norek" contenteditable="true" maxlength="15"></td>
+      <td class="mantri-cell"></td>
+      <td class="row-actions no-export"><button class="delRowBtn" title="Hapus baris">✕</button></td>
+    `;
+    const mantriCell = row.querySelector('.mantri-cell');
+    const newSelect = buildMantriSelect();
+    mantriCell.appendChild(newSelect);
+    newSelect.addEventListener('change', updateMantriCounts);
+    tableBody.appendChild(row);
+    attachDelHandler(row.querySelector('.delRowBtn'));
+    enforceMaxLength(row.querySelector('.norek'));
+    renumber();
+    updateMantriCounts();
+    row.querySelector('.nasabah').focus();
+  }
+
+  document.getElementById('addRowBtnBottom').addEventListener('click', addRow);
+  tableBody.querySelectorAll('.delRowBtn').forEach(attachDelHandler);
+  tableBody.querySelectorAll('.norek').forEach(enforceMaxLength);
+  tableBody.querySelectorAll('.mantri-select').forEach(sel => {
+    sel.addEventListener('change', updateMantriCounts);
+  });
+  updateMantriCounts();
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const capture = document.getElementById('capture');
+    const hiddenEls = capture.querySelectorAll('.no-export');
+    hiddenEls.forEach(el => el.style.visibility = 'hidden');
+
+    const selects = capture.querySelectorAll('.mantri-select');
+    const replacements = [];
+    selects.forEach(sel => {
+      const span = document.createElement('span');
+      span.textContent = sel.value || '—';
+      span.style.fontSize = '13.5px';
+      replacements.push({sel, span});
+      sel.style.display = 'none';
+      sel.parentNode.appendChild(span);
+    });
+
+    html2canvas(capture, {
+      backgroundColor:'#ffffff',
+      scale: 2
+    }).then(canvas => {
+      hiddenEls.forEach(el => el.style.visibility = '');
+      replacements.forEach(({sel, span}) => {
+        sel.style.display = '';
+        span.remove();
+      });
+      const link = document.createElement('a');
+      link.download = 'laporan-aktivasi-brilink-mantri.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  });
+</script>
+</body>
+</html>
