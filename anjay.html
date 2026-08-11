@@ -56,6 +56,16 @@
     color:var(--muted);
     margin-left:auto;
   }
+  .sync-status{
+    font-size:12px;
+    font-weight:600;
+    padding:6px 10px;
+    border-radius:14px;
+    white-space:nowrap;
+  }
+  .sync-status.sync-connecting{ background:#fff4d6; color:#8a6d1a; }
+  .sync-status.sync-online{ background:#dff3e3; color:#1f7a3d; }
+  .sync-status.sync-offline{ background:#fde3e3; color:#a3312a; }
 
   #capture{
     max-width:880px;
@@ -296,6 +306,7 @@
 
   <div class="toolbar">
     <button id="downloadBtn">⬇ Unduh sebagai PNG</button>
+    <span id="syncStatus" class="sync-status sync-connecting">● Menyambungkan…</span>
     <span class="hint">Klik pada sel untuk mengedit • No. rekening maks 15 karakter • Klik ✕ untuk hapus baris</span>
   </div>
 
@@ -361,9 +372,129 @@
   const tableBody = document.getElementById('tableBody');
   const totalCount = document.getElementById('totalCount');
   const printDate = document.getElementById('printDate');
+  const unitNameEl = document.getElementById('unitName');
+  const syncStatusEl = document.getElementById('syncStatus');
 
   const MANTRI_OPTIONS = ["REZA","RIKA","IWAN","CINLAW","SHALEH","RAEHAN"];
   const mantriSummary = document.getElementById('mantriSummary');
+
+  // ====== FIREBASE REALTIME DATABASE SYNC ======
+  // Pakai REST API + Server-Sent Events langsung (tanpa SDK/API key),
+  // jadi cukup rules-nya mengizinkan baca/tulis publik (test mode).
+  const FIREBASE_BASE = "https://brilinkrantim-default-rtdb.asia-southeast1.firebasedatabase.app";
+  const DATA_PATH = "laporan";
+  const CLIENT_ID = "c_" + Math.random().toString(36).slice(2) + "_" + Date.now();
+
+  let suppressSave = false;   // true saat sedang render data dari server, biar tidak menulis ulang
+  let saveTimer = null;
+
+  function setSyncStatus(state){
+    syncStatusEl.classList.remove('sync-connecting','sync-online','sync-offline');
+    if(state === 'online'){
+      syncStatusEl.classList.add('sync-online');
+      syncStatusEl.textContent = '● Tersambung';
+    } else if(state === 'offline'){
+      syncStatusEl.classList.add('sync-offline');
+      syncStatusEl.textContent = '● Gagal tersambung';
+    } else {
+      syncStatusEl.classList.add('sync-connecting');
+      syncStatusEl.textContent = '● Menyambungkan…';
+    }
+  }
+
+  function collectData(){
+    const rows = [];
+    tableBody.querySelectorAll('tr').forEach(row => {
+      rows.push({
+        nasabah: row.querySelector('.nasabah').textContent,
+        brilink: row.querySelector('.brilink').textContent,
+        norek: row.querySelector('.norek').textContent,
+        mantri: row.querySelector('.mantri-select').value
+      });
+    });
+    return {
+      unitName: unitNameEl.textContent,
+      rows,
+      updatedBy: CLIENT_ID,
+      updatedAt: Date.now()
+    };
+  }
+
+  function scheduleSave(){
+    if(suppressSave) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveToFirebase, 500);
+  }
+
+  function saveToFirebase(){
+    const data = collectData();
+    fetch(`${FIREBASE_BASE}/${DATA_PATH}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(res => {
+      if(!res.ok) throw new Error('write failed');
+      setSyncStatus('online');
+    }).catch(() => setSyncStatus('offline'));
+  }
+
+  function renderFromData(data){
+    suppressSave = true;
+    unitNameEl.textContent = data.unitName || '';
+    tableBody.innerHTML = '';
+    const rows = (data.rows && data.rows.length) ? data.rows : [{nasabah:'',brilink:'',norek:'',mantri:''}];
+    rows.forEach(r => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="no-col"></td>
+        <td class="nasabah" contenteditable="true" data-label="Nama Nasabah"></td>
+        <td class="brilink" contenteditable="true" data-label="Nama BRILink"></td>
+        <td class="norek" contenteditable="true" maxlength="15" data-label="No Rekening"></td>
+        <td class="mantri-cell" data-label="Mantri"></td>
+        <td class="row-actions no-export"><button class="delRowBtn" title="Hapus baris">✕</button></td>
+      `;
+      row.querySelector('.nasabah').textContent = r.nasabah || '';
+      row.querySelector('.brilink').textContent = r.brilink || '';
+      row.querySelector('.norek').textContent = r.norek || '';
+      const select = buildMantriSelect();
+      select.value = r.mantri || '';
+      row.querySelector('.mantri-cell').appendChild(select);
+      tableBody.appendChild(row);
+      wireRow(row);
+    });
+    renumber();
+    updateMantriCounts();
+    suppressSave = false;
+  }
+
+  function connectRealtime(){
+    setSyncStatus('connecting');
+    const es = new EventSource(`${FIREBASE_BASE}/${DATA_PATH}.json`);
+    let gotFirstEvent = false;
+
+    es.addEventListener('put', (e) => {
+      setSyncStatus('online');
+      try{
+        const payload = JSON.parse(e.data);
+        const data = payload.data;
+        gotFirstEvent = true;
+        if(!data){
+          // belum ada data di database sama sekali -> kirim data lokal sekarang sebagai data awal
+          if(!suppressSave) saveToFirebase();
+          return;
+        }
+        // Abaikan event balasan dari tulisan kita sendiri
+        if(data.updatedBy === CLIENT_ID) return;
+        renderFromData(data);
+      }catch(err){ /* abaikan payload yang tidak terduga */ }
+    });
+
+    es.onerror = () => {
+      setSyncStatus('offline');
+    };
+
+    es.onopen = () => setSyncStatus('online');
+  }
 
   function updateMantriCounts(){
     const counts = {};
@@ -432,11 +563,26 @@
         row.querySelectorAll('[contenteditable]').forEach(c => c.textContent = '');
         row.querySelector('.mantri-select').value = '';
         updateMantriCounts();
+        scheduleSave();
         return;
       }
       btn.closest('tr').remove();
       renumber();
       updateMantriCounts();
+      scheduleSave();
+    });
+  }
+
+  // Pasang semua event listener (edit sel, ganti mantri, hapus baris) untuk satu baris
+  function wireRow(row){
+    attachDelHandler(row.querySelector('.delRowBtn'));
+    enforceMaxLength(row.querySelector('.norek'));
+    row.querySelectorAll('.nasabah, .brilink, .norek').forEach(cell => {
+      cell.addEventListener('input', scheduleSave);
+    });
+    row.querySelector('.mantri-select').addEventListener('change', () => {
+      updateMantriCounts();
+      scheduleSave();
     });
   }
 
@@ -453,23 +599,20 @@
     const mantriCell = row.querySelector('.mantri-cell');
     const newSelect = buildMantriSelect();
     mantriCell.appendChild(newSelect);
-    newSelect.addEventListener('change', updateMantriCounts);
     tableBody.appendChild(row);
-    attachDelHandler(row.querySelector('.delRowBtn'));
-    enforceMaxLength(row.querySelector('.norek'));
+    wireRow(row);
     renumber();
     updateMantriCounts();
     row.querySelector('.nasabah').focus();
+    scheduleSave();
   }
 
   document.getElementById('addRowBtnBottom').addEventListener('click', addRow);
-  tableBody.querySelectorAll('.delRowBtn').forEach(attachDelHandler);
-  tableBody.querySelectorAll('.norek').forEach(enforceMaxLength);
-  tableBody.querySelectorAll('.mantri-select').forEach(sel => {
-    sel.addEventListener('change', updateMantriCounts);
-  });
+  unitNameEl.addEventListener('input', scheduleSave);
+  tableBody.querySelectorAll('tr').forEach(wireRow);
   renumber();
   updateMantriCounts();
+  connectRealtime();
 
   document.getElementById('downloadBtn').addEventListener('click', () => {
     const capture = document.getElementById('capture');
