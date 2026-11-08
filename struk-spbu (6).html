@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cetak Struk SPBU</title>
+<style>
+:root{--bg:#eceae4;--panel:#fff;--ink:#1c1c1c;--mut:#666;--line:#d6d3cb;--acc:#0b5d3b}
+@media (prefers-color-scheme:dark){:root{--bg:#161616;--panel:#222;--ink:#eee;--mut:#999;--line:#3a3a3a;--acc:#4fbf8a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif}
+.wrap{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:16px;padding:16px;max-width:1100px;margin:auto}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+h1{font-size:18px;margin:0 0 10px}
+h2{font-size:13px;margin:16px 0 6px;color:var(--mut);font-weight:600}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 2px}
+input,select,textarea{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:56px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{padding:9px 12px;border-radius:6px;border:1px solid var(--acc);background:var(--acc);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+button.sec{background:transparent;color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chk{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:13px;color:var(--ink)}
+.chk input{width:auto}
+#status{font-size:12px;color:var(--mut);margin-top:8px;min-height:16px}
+.prev{display:flex;justify-content:center;background:repeating-linear-gradient(45deg,var(--bg),var(--bg) 8px,var(--panel) 8px,var(--panel) 16px);padding:20px;border-radius:8px;border:1px solid var(--line);overflow:auto}
+canvas{background:#fff;max-width:100%;height:auto;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.note{font-size:12px;color:var(--mut);margin-top:12px}
+@media print{body *{visibility:hidden}#cv,#cv *{visibility:visible}#cv{position:absolute;left:0;top:0;box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="panel">
+  <h1>Cetak Struk SPBU <small style="font-weight:400;color:var(--mut)">v6</small></h1>
+  <label>Model struk</label>
+  <select id="tpl">
+   <option value="A">Model A – Pulau/Pompa (2023)</option>
+   <option value="B">Model B – Nomor Printer/Selang (2018)</option>
+   <option value="C">Model C – No. Nota, Tunai/Kembali (2016)</option>
+   <option value="D">Model D – Nomor Selang/Nota (2013)</option>
+  </select>
+  <div class="row">
+   <div><label>Lebar kertas</label>
+    <select id="paper"><option value="384">58 mm (384 dot)</option><option value="576">80 mm (576 dot)</option></select></div>
+   <div><label>Hitung total otomatis</label>
+    <select id="auto"><option value="1">Ya (harga × liter)</option><option value="0">Tidak, isi manual</option></select></div>
+  </div>
+
+  <h2>Logo</h2>
+  <input type="file" id="logo" accept="image/*">
+  <div class="row">
+   <div><label>Lebar logo (%)</label><input type="number" id="logow" value="60" min="10" max="100"></div>
+   <div><label>Hapus logo</label><button class="sec" id="nologo" type="button" style="width:100%">Tanpa logo</button></div>
+  </div>
+
+  <h2>Identitas SPBU</h2>
+  <label>Kode SPBU</label><input id="kode" value="64.731.02">
+  <label>Nama SPBU (khusus model A)</label><input id="nama" value="SPBU RTA MILONO">
+  <label>Alamat (tiap baris = 1 baris struk)</label><textarea id="alamat">Jl. RTA MILONO PALANGKA RAYA</textarea>
+  <label>Telepon</label><input id="telp" value="">
+
+  <h2>Transaksi</h2>
+  <div class="row">
+   <div><label>Tanggal & jam</label><input type="datetime-local" step="1" id="waktu"></div>
+   <div><label>No. nota / trans</label><input id="nota" value="2315892"></div>
+   <div><label>Shift</label><input id="shift" value="2"></div>
+   <div><label>Pulau/Pompa/Selang/Printer</label><input id="selang" value="2"></div>
+   <div><label>Jenis BBM</label><input id="produk" value="PERTALITE"></div>
+   <div><label>Harga per liter (Rp)</label><input type="number" id="harga" value="10000"></div>
+   <div><label>Volume (liter)</label><input type="number" step="0.01" id="liter" value="3"></div>
+   <div><label>Total (jika manual)</label><input type="number" id="total" value="30000"></div>
+   <div><label>Tunai (Rp)</label><input type="number" id="tunai" value="30000"></div>
+   <div><label>Operator</label><input id="operator" value="RISA"></div>
+   <div><label>Nopol (model B)</label><input id="nopol" value="W416RH"></div>
+  </div>
+  <label>Teks penutup (tiap baris = 1 baris)</label><textarea id="footer">TERIMA KASIH SELAMAT JALAN</textarea>
+
+  <h2>Printer (USB / Bluetooth)</h2>
+  <label>Jenis koneksi</label>
+  <select id="conn"><option value="usb">USB (WebUSB)</option><option value="bt">Bluetooth</option></select>
+  <div class="row">
+   <div><label>Mode gambar</label><select id="mode"><option value="gs">Standar (GS v 0)</option><option value="esc">Kompatibel (ESC *)</option></select></div>
+   <div><label>Kecepatan kirim</label><select id="speed"><option value="20">Normal</option><option value="60">Lambat</option><option value="120">Sangat lambat</option></select></div>
+  </div>
+  <div class="btns">
+   <button id="btCon" type="button">Hubungkan printer</button>
+   <button id="btPrint" type="button">Cetak ke printer</button>
+   <button id="btTest" class="sec" type="button">Tes cetak teks</button>
+   <button id="sysPrint" class="sec" type="button">Cetak lewat browser</button>
+   <button id="png" class="sec" type="button">Simpan PNG</button>
+  </div>
+  <div id="status">Belum terhubung.</div>
+  <p class="note">Perlu Chrome/Edge (Android atau desktop) dan printer thermal ESC/POS Bluetooth LE. Safari/iOS tidak mendukung Web Bluetooth. Gunakan untuk keperluan sah, misalnya SPBU/Pertashop milik sendiri, simulasi atau pelatihan kasir.</p>
+ </div>
+
+ <div class="panel">
+  <div class="prev"><canvas id="cv"></canvas><style id="pg"></style></div>
+ </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const FIELDS=['tpl','paper','auto','logow','kode','nama','alamat','telp','waktu','nota','shift','selang','produk','harga','liter','total','tunai','operator','nopol','footer','mode','speed','conn'];
+let logoImg=null;
+const HARI=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const BULAN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const p2=n=>String(n).padStart(2,'0');
+
+function nowLocal(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`}
+function fmt(n,dec,thou,decSep){
+  const s=Number(n).toFixed(dec);let [a,b]=s.split('.');
+  a=a.replace(/\B(?=(\d{3})+(?!\d))/g,thou);
+  return b?a+decSep+b:a;
+}
+
+/* ---------- Render ---------- */
+const CW=12, LH=26; // lebar karakter & tinggi baris (dot)
+function render(){
+  const W=+$('paper').value, cols=Math.floor(W/CW), t=$('tpl').value;
+  const harga=+$('harga').value||0, liter=+$('liter').value||0;
+  const total=$('auto').value==='1'?Math.round(harga*liter):(+$('total').value||0);
+  const tunai=+$('tunai').value||0;
+  const d=new Date($('waktu').value||nowLocal());
+  const A=t==='A';
+  const rp=n=>fmt(n,0,A?',':'.',',');
+  const lit=n=>A?fmt(n,2,',','.'):fmt(n,2,'.',',');
+  const lines=[];
+  const wrap=(s,max)=>{const out=[];let cur='';s.split(' ').forEach(w=>{if((cur+' '+w).trim().length>max&&cur){out.push(cur);cur=w}else cur=(cur+' '+w).trim()});out.push(cur);return out};
+  const L=(text,o={})=>{const s=o.scale||1,max=Math.floor(cols/s);
+    (text.length>max?wrap(text,max):[text]).forEach(x=>lines.push({scale:s,segs:[{text:x,s,b:o.bold,align:o.align||'left'}]}))};
+  const lr=(a,b)=>L(a+' '.repeat(Math.max(1,cols-a.length-b.length))+b);
+  const kv=(k,v,w=14)=>L(k.padEnd(w)+': '+v);
+  const kvRp=(k,num,w=14)=>{const left=k.padEnd(w)+': Rp.';const n=String(num);L(left+n.padStart(Math.max(cols-left.length,n.length)))};
+  const kvR=(k,num,w=14)=>{const left=k.padEnd(w)+': ';const n=String(num);L(left+n.padStart(Math.max(cols-left.length,n.length)))};
+  const sep=()=>lines.push({scale:1,segs:[{text:'-'.repeat(cols),s:1}]});
+  const totalRow=(num,w=14)=>{
+    const avail=W-(w+5)*CW-8;
+    const s=Math.max(1,Math.min(1.5,Math.floor(avail/(num.length*CW)*10)/10));
+    lines.push({scale:1.5,segs:[{text:'Total',x:0,s:1.5,b:true},{text:': Rp.',x:w*CW,s:1},{text:num,right:true,s,b:true}]});
+  };
+  const addr=$('alamat').value.split('\n').filter(x=>x.trim());
+  const foot=$('footer').value.split('\n').filter(x=>x.trim());
+  const kode=$('kode').value, telp=$('telp').value;
+  const tgl=`${p2(d.getDate())}/${p2(d.getMonth()+1)}/${d.getFullYear()}`;
+  const jam=`${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;
+  const hari=`${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+  const pre=(p)=>/^spbu/i.test(kode)?kode:p+kode;
+
+  if(logoImg) lines.push({logo:true});
+  if(t==='A'){
+    L(kode,{align:'center'});L($('nama').value,{align:'center'});
+    addr.forEach(a=>L(a,{align:'center'}));
+    lr('Shift : '+$('shift').value,'No Trans : '+$('nota').value);
+    L('Waktu : '+tgl+'   '+jam);
+    sep();
+    kv('Pulau/Pompa',$('selang').value);kv('Nama Produk',$('produk').value);
+    kv('Harga/Liter','Rp. '+rp(harga));kv('Volume','(L) '+lit(liter));
+    kv('Total Harga','Rp. '+rp(total));kv('Operator',$('operator').value);
+    sep();
+    L('CASH');
+    L(rp(tunai||total).padStart(cols-2));
+    sep();
+    foot.forEach(f=>L(f,{align:'center'}));
+  }else if(t==='B'){
+    L(pre('SPBU.'));addr.forEach(a=>L(a));if(telp)L('Telp.'+telp);
+    L(hari+' '+jam);
+    L('');
+    kv('Nomor Printer','1',15);kv('Nomor Selang',$('selang').value,15);
+    kv('Jenis BBM',$('produk').value,15);kvR('Liter',lit(liter),15);
+    kvRp('Harga/liter',rp(harga),15);
+    totalRow(rp(total),15);
+    L('');
+    kv('Nopol',$('nopol').value,15);
+    foot.forEach(f=>L(f));
+  }else if(t==='C'){
+    L(pre('SPBU '),{scale:1.5,bold:true});addr.forEach(a=>L(a));if(telp)L('Telp. '+telp);
+    L(hari+' '+jam);
+    L('');
+    kv('No. Nota',$('nota').value,13);kv('Jenis BBM',$('produk').value,13);
+    kvRp('Harga/liter',rp(harga),13);kvR('Liter',lit(liter),13);
+    totalRow(rp(total),13);
+    sep();
+    const tn=tunai||total;
+    kvRp('Tunai',rp(tn),13);kvRp('Kembali',tn>total?rp(tn-total):'0000',13);
+    L('');foot.forEach(f=>L(f));
+  }else{
+    L(pre('SPBU '),{scale:1.5,bold:true,align:'center'});addr.forEach(a=>L(a,{align:'center'}));
+    if(telp)L('TELP. '+telp,{align:'center'});
+    L('');
+    L(`${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`);
+    L('Jam : '+jam);L('');
+    kv('Nomor Selang',$('selang').value);kv('Nomor Nota',$('nota').value);
+    kv('Jenis BBM',$('produk').value);kvR('Liter',lit(liter));
+    kvRp('Harga/liter',rp(harga));
+    totalRow(rp(total));
+    sep();
+    L('');foot.forEach(f=>L(f,{align:'center'}));
+  }
+
+  // hitung tinggi
+  const lw=Math.max(10,Math.min(100,+$('logow').value||60))/100*W;
+  let lh=0;if(logoImg)lh=Math.round(logoImg.height*lw/logoImg.width)+14;
+  const hOf=l=>Math.round(LH*l.scale)+2;
+  let H=16;lines.forEach(l=>H+=l.logo?lh:hOf(l));H+=24;
+  const cv=$('cv');cv.width=W;cv.height=H;
+  const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,W,H);c.fillStyle='#000';c.textBaseline='alphabetic';
+  let y=10;
+  lines.forEach(l=>{
+    if(l.logo){c.drawImage(logoImg,(W-lw)/2,y,lw,lh-14);y+=lh;return}
+    const base=y+Math.round(LH*l.scale*0.78);
+    l.segs.forEach(sg=>{
+      const s=sg.s||1,cw=CW*s,chars=[...sg.text],tw=chars.length*cw;
+      c.font=`${sg.b?'bold ':''}${Math.round(20*s)}px "Courier New",Courier,monospace`;
+      let x=sg.right?W-tw-4:sg.align==='center'?Math.max(0,(W-tw)/2):(sg.x||0);
+      chars.forEach((ch,i)=>{const w=c.measureText(ch).width;c.fillText(ch,x+i*cw+(cw-w)/2,base)});
+    });
+    y+=hOf(l);
+  });
+  save();
+}
+
+/* ---------- Simpan pengaturan ---------- */
+function save(){try{const o={};FIELDS.forEach(f=>o[f]=$(f).value);localStorage.setItem('struk',JSON.stringify(o))}catch(e){}}
+function load(){try{const o=JSON.parse(localStorage.getItem('struk')||'{}');FIELDS.forEach(f=>{if(o[f]!==undefined)$(f).value=o[f]})}catch(e){}}
+load();if(!$('waktu').value)$('waktu').value=nowLocal();
+FIELDS.forEach(f=>$(f).addEventListener('input',render));
+$('logo').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;const im=new Image();
+  im.onload=()=>{logoImg=im;render()};im.src=URL.createObjectURL(f);
+});
+$('nologo').onclick=()=>{logoImg=null;$('logo').value='';render()};
+render();
+
+/* ---------- ESC/POS ---------- */
+function toEscPos(){
+  const cv=$('cv'),W=cv.width,H=cv.height,img=cv.getContext('2d').getImageData(0,0,W,H).data;
+  const dark=(x,y)=>{if(x>=W||y>=H)return 0;const i=(y*W+x)*4;return (.3*img[i]+.59*img[i+1]+.11*img[i+2])<160?1:0};
+  const out=[0x1B,0x40];
+  if($('mode').value==='esc'){
+    out.push(0x1B,0x33,24); // jarak baris 24 dot
+    for(let y0=0;y0<H;y0+=24){
+      out.push(0x1B,0x2A,33,W&255,W>>8);
+      for(let x=0;x<W;x++)for(let k=0;k<3;k++){let b=0;for(let j=0;j<8;j++)if(dark(x,y0+k*8+j))b|=0x80>>j;out.push(b)}
+      out.push(0x0A);
+    }
+    out.push(0x1B,0x32);
+  }else{
+    const bpr=W/8;
+    for(let y0=0;y0<H;y0+=128){
+      const h=Math.min(128,H-y0);
+      out.push(0x1D,0x76,0x30,0x00,bpr&255,bpr>>8,h&255,h>>8);
+      for(let y=y0;y<y0+h;y++)for(let bx=0;bx<bpr;bx++){let b=0;for(let k=0;k<8;k++)if(dark(bx*8+k,y))b|=0x80>>k;out.push(b)}
+    }
+  }
+  out.push(0x1B,0x64,0x04);
+  return new Uint8Array(out);
+}
+let dev=null,chr=null;
+const SERVICES=['000018f0-0000-1000-8000-00805f9b34fb','0000ffe0-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2','0000ff00-0000-1000-8000-00805f9b34fb'];
+const st=m=>$('status').textContent=m;
+async function connect(){
+  if(!navigator.bluetooth){st('Browser ini tidak mendukung Web Bluetooth. Gunakan Chrome/Edge.');return false}
+  try{
+    dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SERVICES});
+    dev.addEventListener('gattserverdisconnected',()=>{chr=null;st('Terputus.')});
+    st('Menghubungkan...');
+    const srv=await dev.gatt.connect();chr=null;let info='';
+    const PREF=[['000018f0-0000-1000-8000-00805f9b34fb','00002af1-0000-1000-8000-00805f9b34fb'],['0000ffe0-0000-1000-8000-00805f9b34fb','0000ffe1-0000-1000-8000-00805f9b34fb'],['49535343-fe7d-4ae5-8fa9-9fafd205e455','49535343-8841-43f4-a8d4-ecbe34729bb3'],['e7810a71-73ae-499d-8c15-faa9aef0c3f2','bef8d6c9-9c21-4c9e-b632-bd58c1009f9f'],['0000ff00-0000-1000-8000-00805f9b34fb','0000ff02-0000-1000-8000-00805f9b34fb']];
+    for(const [sv,cu] of PREF){
+      try{const sx=await srv.getPrimaryService(sv);const ch=await sx.getCharacteristic(cu);
+        if(ch.properties.write||ch.properties.writeWithoutResponse){chr=ch;info=sv.slice(4,8);break}}catch(e){}
+    }
+    if(!chr){
+      const skip=/^0000(1800|1801|180a|180f)/;
+      for(const sx of await srv.getPrimaryServices()){
+        if(skip.test(sx.uuid))continue;
+        for(const ch of await sx.getCharacteristics()){
+          if(ch.properties.write||ch.properties.writeWithoutResponse){chr=ch;info=sx.uuid.slice(0,8);break}
+        }if(chr)break;
+      }
+    }
+    if(!chr){st('Terhubung, tetapi karakteristik tulis tidak ditemukan.');return false}
+    st('Terhubung ke '+(dev.name||'printer')+' (layanan '+info+').');return true;
+  }catch(e){st('Gagal: '+e.message);return false}
+}
+let usbDev=null,usbEp=null;
+async function connectUSB(){
+  if(!navigator.usb){st('Browser ini tidak mendukung WebUSB. Gunakan Chrome/Edge.');return false}
+  try{
+    usbDev=await navigator.usb.requestDevice({filters:[]});
+    await usbDev.open();
+    if(!usbDev.configuration)await usbDev.selectConfiguration(1);
+    let best=null;
+    for(const pass of [1,2]){
+      for(const i of usbDev.configuration.interfaces)for(const al of i.alternates)for(const e of al.endpoints){
+        if(!best&&e.direction==='out'&&e.type==='bulk'&&(pass===2||al.interfaceClass===7))best={n:i.interfaceNumber,alt:al.alternateSetting,ep:e.endpointNumber};
+      }
+      if(best)break;
+    }
+    if(!best){st('Endpoint cetak USB tidak ditemukan.');return false}
+    await usbDev.claimInterface(best.n);
+    if(best.alt)await usbDev.selectAlternateInterface(best.n,best.alt);
+    usbEp=best.ep;st('USB terhubung: '+(usbDev.productName||'printer')+'.');return true;
+  }catch(e){
+    usbEp=null;
+    st('Gagal USB: '+e.message+(/claim|access|denied/i.test(e.message)?' — di Windows, driver printer biasanya menguasai port USB. Pakai Zadig (driver WinUSB) atau gunakan Android, atau pakai tombol Cetak lewat browser.':''));
+    return false;
+  }
+}
+const isUSB=()=>$('conn').value==='usb';
+const ready=()=>isUSB()?!!usbEp:!!chr;
+const connectAny=()=>isUSB()?connectUSB():connect();
+async function send(data){
+  if(isUSB()){
+    for(let i=0;i<data.length;i+=512){await usbDev.transferOut(usbEp,data.slice(i,i+512));await new Promise(r=>setTimeout(r,5))}
+    return;
+  }
+  const dl=+$('speed').value,size=dl>20?60:100;
+  for(let i=0;i<data.length;i+=size){
+    const part=data.slice(i,i+size);
+    if(chr.properties.writeWithoutResponse)await chr.writeValueWithoutResponse(part);else await chr.writeValue(part);
+    await new Promise(r=>setTimeout(r,dl));
+  }
+}
+async function printBT(){
+  if(!ready()&&!(await connectAny()))return;
+  try{st('Mencetak...');await send(toEscPos());st('Selesai dicetak.')}catch(e){st('Gagal cetak: '+e.message)}
+}
+async function testBT(){
+  if(!ready()&&!(await connectAny()))return;
+  try{st('Mencetak tes...');await send(new Uint8Array([0x1B,0x40,...new TextEncoder().encode('TES PRINTER OK\n1234567890\n\n\n')]));st('Tes terkirim.')}catch(e){st('Gagal: '+e.message)}
+}
+$('btCon').onclick=connectAny;
+$('btPrint').onclick=printBT;
+$('btTest').onclick=testBT;
+$('sysPrint').onclick=()=>{const cv=$('cv'),mm=cv.width===384?58:80,hmm=Math.ceil(cv.height/cv.width*mm)+2;
+  $('pg').textContent=`@page{size:${mm}mm ${hmm}mm;margin:0}@media print{html,body{margin:0;padding:0;width:${mm}mm}#cv{width:${mm}mm!important;height:${hmm-2}mm!important;max-width:none!important}}`;
+  window.print();};
+$('png').onclick=()=>{const a=document.createElement('a');a.href=$('cv').toDataURL('image/png');a.download='struk.png';a.click()};
+</script>
+</body>
+</html>
